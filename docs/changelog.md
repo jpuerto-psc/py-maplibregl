@@ -1,5 +1,9 @@
 # Changelog for MapLibre for Python
 
+## maplibre v0.3.6
+
+* Fix #154 (geopandas dependency issue)
+
 ## maplibre v0.3.5
 
 * Fix #142 (thx to @nuayge)
