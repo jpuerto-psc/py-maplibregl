@@ -1,4 +1,4 @@
-# MAPLIBRE_JS_VERSION = "5.3.1"
+# MAPLIBRE_JS_VERSION = "5.21.1"
 
 html_template = """<!DOCTYPE html>
 <html lang="en">
