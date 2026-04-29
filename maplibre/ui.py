@@ -10,7 +10,7 @@ from shiny.module import resolve_id
 
 from ._constants import _shiny_output_class
 
-MAPLIBREGL_VERSION = "5.21.1"
+MAPLIBREGL_VERSION = "5.24.0"
 
 # TODO: Rename to maplibregl-bindings
 pymaplibregl_dep = HTMLDependency(

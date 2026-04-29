@@ -1,5 +1,5 @@
 #!/bin/sh
-version=${1:-5.21.1}
+version=${1:-5.24.0}
 echo $version
 target_dir=maplibre/srcjs
 echo $target_dir
