@@ -133,6 +133,7 @@ class Map(object):
             map_options.to_dict() | kwargs
         )  # MapOptions(**kwargs).to_dict() # need to fix MapWidget, because height is passed as kwarg
         self._message_queue = []
+        self._legend_control_added = False
         self.add_layers(layers, sources)
         if controls:
             for control in controls:
@@ -295,6 +296,18 @@ class Map(object):
             value (any): The value of the global state property.
         """
         self.add_call("setGlobalStateProperty", name, value)
+        if name == "legend" and value and not self._legend_control_added:
+            self.add_legend_control()
+
+    def add_legend_control(self, position: str = "bottom-left", options: dict = None) -> None:
+        """Add a legend control. Auto-called when set_global_state_property("legend", ...) is used.
+
+        Args:
+            position (str): Control position. Defaults to "bottom-left".
+            options (dict): Optional plugin overrides with keys ``js`` and ``css`` (URLs).
+        """
+        self._legend_control_added = True
+        self.add_call("addLegendControl", None, position, options or {})
 
     def set_paint_property(self, layer_id: str, prop: str, value: any) -> None:
         """Update the paint property of a layer

@@ -1,5 +1,6 @@
 "use strict";
 (() => {
+  const _pywidgetBaseUrl = document.currentScript ? new URL(".", document.currentScript.src).href : null;
   // node_modules/pmtiles/dist/index.js
   var __pow = Math.pow;
   var __async = (__this, __arguments, generator) => {
@@ -2166,6 +2167,31 @@
       const layers = this._convertDeckLayers(deckLayers, tooltip);
       this._deckOverlay.setProps({ layers });
     }
+    async addLegendControl(legendData, position = "bottom-left", options = {}) {
+      const base = _pywidgetBaseUrl;
+      const global = window.pymaplibreglLegend || {};
+      const jsUrl = options.js || global.js || (base && base + "legend.js");
+      const cssUrl = options.css || global.css || (base && base + "legend.css");
+      if (!jsUrl) return;
+      const cssId = "maplibregl-legend-stylesheet";
+      if (cssUrl && !document.getElementById(cssId)) {
+        const link = document.createElement("link");
+        link.id = cssId;
+        link.rel = "stylesheet";
+        link.href = cssUrl;
+        document.head.appendChild(link);
+      }
+      if (legendData) this._map.setGlobalStateProperty("legend", legendData);
+      let createControl;
+      try {
+        const mod = await import(jsUrl);
+        createControl = mod.createControl;
+      } catch (_) {
+        return;
+      }
+      if (!createControl) return;
+      this._map.addControl(createControl(), position);
+    }
     addMapboxDraw(options, position, geojson = null) {
       const draw = new MapboxDraw(options);
       this._map.addControl(draw, position);
@@ -2204,7 +2230,8 @@
           "setSourceData",
           "addDeckOverlay",
           "setDeckLayers",
-          "addMapboxDraw"
+          "addMapboxDraw",
+          "addLegendControl"
         ].includes(name)) {
           console.log("Custom method", name, params);
           this[name](...params);
