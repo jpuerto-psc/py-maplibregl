@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import json
+import os
 import webbrowser
 from typing import Union
 
@@ -304,10 +305,26 @@ class Map(object):
 
         Args:
             position (str): Control position. Defaults to "bottom-left".
-            options (dict): Optional plugin overrides with keys ``js`` and ``css`` (URLs).
+            options (dict): Optional plugin overrides. Keys ``js``/``css`` for URLs,
+                            or ``jsContent``/``cssContent`` for raw source strings.
+                            Falls back to env vars ``PYMAPLIBREGL_LEGEND_JS`` /
+                            ``PYMAPLIBREGL_LEGEND_CSS`` (file paths or URLs).
         """
         self._legend_control_added = True
-        self.add_call("addLegendControl", None, position, options or {})
+        resolved = {}
+        for env_var, content_key, url_key in [
+            ("PYMAPLIBREGL_LEGEND_JS", "jsContent", "js"),
+            ("PYMAPLIBREGL_LEGEND_CSS", "cssContent", "css"),
+        ]:
+            val = os.environ.get(env_var)
+            if val:
+                if os.path.isfile(val):
+                    with open(val) as f:
+                        resolved[content_key] = f.read()
+                else:
+                    resolved[url_key] = val
+        resolved.update(options or {})
+        self.add_call("addLegendControl", None, position, resolved)
 
     def set_paint_property(self, layer_id: str, prop: str, value: any) -> None:
         """Update the paint property of a layer

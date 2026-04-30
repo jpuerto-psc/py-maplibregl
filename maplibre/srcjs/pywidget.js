@@ -1,6 +1,5 @@
 "use strict";
 (() => {
-  const _pywidgetBaseUrl = document.currentScript ? new URL(".", document.currentScript.src).href : null;
   // node_modules/pmtiles/dist/index.js
   var __pow = Math.pow;
   var __async = (__this, __arguments, generator) => {
@@ -2168,23 +2167,37 @@
       this._deckOverlay.setProps({ layers });
     }
     async addLegendControl(legendData, position = "bottom-left", options = {}) {
-      const base = _pywidgetBaseUrl;
-      const global = window.pymaplibreglLegend || {};
-      const jsUrl = options.js || global.js || (base && base + "legend.js");
-      const cssUrl = options.css || global.css || (base && base + "legend.css");
-      if (!jsUrl) return;
+      const g = window.pymaplibreglLegend || {};
+      const jsContent = options.jsContent || g.jsContent;
+      const jsUrl = options.js || g.js;
+      const cssContent = options.cssContent || g.cssContent;
+      const cssUrl = options.css || g.css;
+      if (!jsContent && !jsUrl) return;
       const cssId = "maplibregl-legend-stylesheet";
-      if (cssUrl && !document.getElementById(cssId)) {
-        const link = document.createElement("link");
-        link.id = cssId;
-        link.rel = "stylesheet";
-        link.href = cssUrl;
-        document.head.appendChild(link);
+      if (!document.getElementById(cssId)) {
+        if (cssContent) {
+          const style = document.createElement("style");
+          style.id = cssId;
+          style.textContent = cssContent;
+          document.head.appendChild(style);
+        } else if (cssUrl) {
+          const link = document.createElement("link");
+          link.id = cssId;
+          link.rel = "stylesheet";
+          link.href = cssUrl;
+          document.head.appendChild(link);
+        }
       }
       if (legendData) this._map.setGlobalStateProperty("legend", legendData);
       let createControl;
       try {
-        const mod = await import(jsUrl);
+        let importUrl = jsUrl;
+        if (jsContent) {
+          const blob = new Blob([jsContent], { type: "application/javascript" });
+          importUrl = URL.createObjectURL(blob);
+        }
+        const mod = await import(importUrl);
+        if (jsContent) URL.revokeObjectURL(importUrl);
         createControl = mod.createControl;
       } catch (_) {
         return;
