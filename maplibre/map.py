@@ -287,6 +287,15 @@ class Map(object):
         """
         self.add_call("setFilter", layer_id, filter_)
 
+    def set_global_state_property(self, name: str, value: any) -> None:
+        """Set a global state property accessible via the global-state expression
+
+        Args:
+            name (str): The name of the global state property.
+            value (any): The value of the global state property.
+        """
+        self.add_call("setGlobalStateProperty", name, value)
+
     def set_paint_property(self, layer_id: str, prop: str, value: any) -> None:
         """Update the paint property of a layer
 
